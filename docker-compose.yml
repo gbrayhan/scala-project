@@ -1,0 +1,57 @@
+
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: miusuario
+      POSTGRES_PASSWORD: mipassword
+      POSTGRES_DB: mibasedatos
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  servicio-usuarios:
+    build: ./servicios/servicio-usuarios
+    container_name: servicio-usuarios
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_USER: miusuario
+      DB_PASSWORD: mipassword
+      DB_NAME: mibasedatos
+    depends_on:
+      - postgres
+    ports:
+      - "3001:3000"
+    networks:
+      - backend
+
+  servicio-productos:
+    build: ./servicios/servicio-productos
+    container_name: servicio-productos
+    restart: always
+    environment:
+      DB_HOST: postgres
+      DB_USER: miusuario
+      DB_PASSWORD: mipassword
+      DB_NAME: mibasedatos
+    depends_on:
+      - postgres
+    ports:
+      - "3002:3000"
+    networks:
+      - backend
+
+volumes:
+  db-data:
+
+networks:
+  backend:
+    driver: bridge
+
